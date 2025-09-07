@@ -142,25 +142,45 @@ pie title Test Coverage Distribution
 ### 🔄 Parallel Execution Strategy
 
 ```mermaid
-gantt
-    title Pipeline Execution Timeline
-    dateFormat X
-    axisFormat %M:%S
+graph TD
+    subgraph "⚡ Parallel Test Execution (Minutes 2-8)"
+        B1[🧪 Unit Tests<br/>2-5 min] 
+        B2[🔌 API Tests<br/>2-7 min]
+        B3[🖥️ UI Tests Chrome<br/>2-10 min]
+        B4[🦊 UI Tests Firefox<br/>2-10 min]
+        B5[🛡️ Security Scan<br/>2-6 min]
+    end
     
-    section Build
-    Code Compilation    :0, 2m
+    A[🏗️ Build Complete<br/>0-2 min] --> B1
+    A --> B2
+    A --> B3
+    A --> B4
+    A --> B5
     
-    section Testing
-    Unit Tests         :2m, 3m
-    API Tests          :2m, 5m
-    UI Tests (Chrome)  :2m, 8m
-    UI Tests (Firefox) :2m, 8m
-    Security Scan      :2m, 4m
+    B1 --> C[📊 Collect Results<br/>10-11 min]
+    B2 --> C
+    B3 --> C
+    B4 --> C
+    B5 --> C
     
-    section Deploy
-    Staging Deploy     :8m, 3m
-    Production Deploy  :11m, 3m
+    C --> D[🚀 Deploy Pipeline<br/>11-14 min]
+    
+    style A fill:#e3f2fd
+    style C fill:#f3e5f5
+    style D fill:#e8f5e8
 ```
+
+#### ⏱️ Execution Timeline Breakdown
+
+| **Phase** | **Start** | **Duration** | **Jobs Running** | **Total Time Saved** |
+|-----------|-----------|--------------|------------------|----------------------|
+| 🏗️ **Build** | 0:00 | 2 min | 1 job | Baseline |
+| ⚡ **Parallel Testing** | 2:00 | 8 min | 5 jobs simultaneously | **~20 min → 8 min** |
+| 📊 **Results Collection** | 10:00 | 1 min | 1 job | - |
+| 🚀 **Deployment** | 11:00 | 3 min | 1 job | - |
+| **Total Pipeline** | - | **14 min** | - | **65% faster** |
+
+> **💡 Efficiency Gain**: Without parallel execution, these tests would run sequentially taking ~26 minutes. Parallel strategy reduces total time to just 14 minutes!
 
 ### 🚨 Failure Handling & Recovery
 
