@@ -1,0 +1,19 @@
+{
+  "testUser": {
+    "name": "Test User",
+    "email": "test@example.com",
+    "phone": "123-456-7890"
+  },
+  "apiEndpoints": {
+    "posts": "/posts",
+    "users": "/users",
+    "comments": "/comments"
+  },
+  "testData": {
+    "samplePost": {
+      "title": "Sample Test Post",
+      "body": "This is a sample post for testing purposes",
+      "userId": 1
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "qa-portfolio-cypress-tests",
+  "version": "1.0.0",
+  "description": "Cypress E2E tests for QA portfolio",
+  "main": "index.js",
+  "scripts": {
+    "test": "cypress run",
+    "test:open": "cypress open",
+    "test:headless": "cypress run --headless",
+    "test:chrome": "cypress run --browser chrome",
+    "test:firefox": "cypress run --browser firefox"
+  },
+  "devDependencies": {
+    "cypress": "^13.0.0",
+    "cypress-mochawesome-reporter": "^3.5.1"
+  },
+  "keywords": ["cypress", "testing", "qa", "automation", "e2e"],
+  "author": "QA Engineer"
+}

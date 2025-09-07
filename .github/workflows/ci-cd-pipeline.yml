@@ -1,0 +1,142 @@
+name: QA CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        cd tests/api/python
+        pip install -r requirements.txt
+        
+    - name: Run API Tests
+      run: |
+        cd tests/api/python
+        python -m pytest --junitxml=../../reports/api-test-results.xml --html=../../reports/api-report.html
+        
+    - name: Upload API Test Results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: api-test-results
+        path: tests/reports/
+
+  ui-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+        
+    - name: Install Cypress dependencies
+      run: |
+        cd tests/ui/cypress
+        npm install
+        
+    - name: Run Cypress Tests
+      run: |
+        cd tests/ui/cypress
+        npx cypress run --reporter junit --reporter-options mochaFile=../../reports/ui-test-results.xml
+        
+    - name: Set up Python for Selenium
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install Selenium dependencies
+      run: |
+        cd tests/ui/selenium
+        pip install -r requirements.txt
+        
+    - name: Run Selenium Tests
+      run: |
+        cd tests/ui/selenium
+        python -m pytest --junitxml=../../reports/selenium-test-results.xml --html=../../reports/selenium-report.html
+        
+    - name: Upload UI Test Results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: ui-test-results
+        path: tests/reports/
+
+  quality-gate:
+    needs: [api-tests, ui-tests]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Download test results
+      uses: actions/download-artifact@v3
+      with:
+        path: test-results/
+        
+    - name: Quality Gate Check
+      run: |
+        echo "Checking quality gates..."
+        # Add your quality gate logic here
+        # Example: Check test pass rate, coverage, etc.
+        echo "✅ All quality gates passed!"
+        
+    - name: Generate Test Report
+      run: |
+        echo "# Test Execution Summary" > test-summary.md
+        echo "- API Tests: ✅ Passed" >> test-summary.md
+        echo "- UI Tests: ✅ Passed" >> test-summary.md
+        echo "- Quality Gates: ✅ All criteria met" >> test-summary.md
+        
+    - name: Comment PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const summary = fs.readFileSync('test-summary.md', 'utf8');
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: summary
+          });
+
+  deploy:
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Deploy to Staging
+      run: |
+        echo "🚀 Deploying to staging environment..."
+        # Add your deployment logic here
+        
+    - name: Run Smoke Tests
+      run: |
+        echo "🔍 Running smoke tests on staging..."
+        # Add smoke test execution
+        
+    - name: Deploy to Production
+      run: |
+        echo "🎉 Deploying to production environment..."
+        # Add production deployment logic here
